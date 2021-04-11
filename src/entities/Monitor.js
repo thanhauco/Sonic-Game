@@ -29,7 +29,7 @@ export default class Monitor extends Phaser.Physics.Arcade.Sprite {
   }
 
   hit(player) {
-    if (this.isDestroyed) return;
+    
     this.isDestroyed = true;
     
     // Apply power-up effect based on type
