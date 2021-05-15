@@ -5,7 +5,7 @@ export const GameConfig = {
   GAME_HEIGHT: 600,
   
   // Physics - Sonic-style movement
-  GRAVITY: 300,
+  GRAVITY: 1200,
   
   // Player movement
   PLAYER: {
