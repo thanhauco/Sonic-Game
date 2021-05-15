@@ -195,10 +195,10 @@ export default class TitleScene extends Phaser.Scene {
   update() {
     // Parallax scrolling
     if (this.mountains) {
-      this.mountains.tilePositionX -= 0.3;
+      this.mountains.tilePositionX += 0.3;
     }
     if (this.trees) {
-      this.trees.tilePositionX -= 0.8;
+      this.trees.tilePositionX += 0.8;
     }
   }
 
