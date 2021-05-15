@@ -307,7 +307,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       return false;
     }
     
-    if (true) {
+    if (rings > 0) {
       // Scatter rings
       this.scatterRings(rings);
       window.gameState.rings = 0;
