@@ -194,7 +194,7 @@ export default class GameScene extends Phaser.Scene {
     this.drawStar(this.goalSign, x + 4, y - 100, 15);
     
     // Goal trigger zone
-    this.goalZone = this.add.zone(x, y - 60, 200, 120);
+    this.goalZone = this.add.zone(x, y - 60, 50, 120);
     this.physics.add.existing(this.goalZone, true);
     
     // Goal collision
