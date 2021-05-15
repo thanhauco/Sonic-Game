@@ -6,6 +6,7 @@ export default class Monitor extends Phaser.Physics.Arcade.Sprite {
     
     this.scene = scene;
     this.powerUpType = type;
+    this.isDestroyed = false;
     
     scene.add.existing(this);
     scene.physics.add.existing(this);
@@ -29,6 +30,8 @@ export default class Monitor extends Phaser.Physics.Arcade.Sprite {
   }
 
   hit(player) {
+    if (this.isDestroyed) return; 
+    this.isDestroyed = true;
     
     this.isDestroyed = true;
     
