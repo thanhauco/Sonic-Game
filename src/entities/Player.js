@@ -228,7 +228,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     if (this.cursors.down.isDown && onGround) {
       // Charging
       if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-        this.state.spinDashCharge = this.state.spinDashCharge + 1;
+        this.state.spinDashCharge = Math.min(this.state.spinDashCharge + 1, config.SPIN_DASH_MAX_CHARGE);
         
         // Visual feedback for charge
         const chargePercent = this.state.spinDashCharge / config.SPIN_DASH_MAX_CHARGE;
