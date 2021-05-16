@@ -62,6 +62,7 @@ export default class Ring extends Phaser.Physics.Arcade.Sprite {
     window.gameState.rings++;
     window.gameState.score += GameConfig.SCORE.RING;
     
+    
     // Check for extra life
     if (window.gameState.rings >= GameConfig.RINGS_FOR_LIFE) {
       window.gameState.rings -= GameConfig.RINGS_FOR_LIFE;
