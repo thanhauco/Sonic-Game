@@ -32,6 +32,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     // Timers
     this.invincibilityTimer = null;
     this.speedBoostTimer = null;
+    this.trailTimer = 0;
     
     // Create animations
     this.createAnimations();
@@ -162,6 +163,16 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
       this.state.isJumping = false;
     }
     
+    // Handle Speed Trails
+    const currentSpeed = Math.abs(this.body.velocity.x);
+    if (currentSpeed > 450 || this.state.isSpinDashing || this.state.isRolling) {
+        this.trailTimer += this.scene.game.loop.delta;
+        if (this.trailTimer > 50) {
+            this.createTrail();
+            this.trailTimer = 0;
+        }
+    }
+    
     // Invincibility flicker
     if (this.state.isInvincible) {
       this.setAlpha(Math.sin(this.scene.time.now / 50) > 0 ? 1 : 0.3);
@@ -201,6 +212,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.body.velocity.y = config.JUMP_FORCE;
     this.state.isJumping = true;
     
+    // Play jump sound
+    if (this.scene.audio) this.scene.audio.playJump();
+    
     // Emit spark particles
     const sparkEmitter = this.scene.add.particles(this.x, this.y + 20, 'spark', {
       speed: { min: 50, max: 100 },
@@ -217,6 +231,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
     this.state.isSpinDashing = true;
     this.state.spinDashCharge = 0;
     this.play('sonic-spindash');
+    
+    // Play spin sound
+    if (this.scene.audio) this.scene.audio.playSpin();
     
     // Play charging sound effect (visual feedback)
     this.setTint(0x6666FF);
@@ -414,6 +431,22 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
         this.starEmitter.destroy();
         this.starEmitter = null;
       }
+    });
+  }
+
+  createTrail() {
+    const ghost = this.scene.add.sprite(this.x, this.y, 'sonic', this.frame.name);
+    ghost.setScale(this.scaleX, this.scaleY);
+    ghost.setFlipX(this.flipX);
+    ghost.setAlpha(0.5);
+    ghost.setTint(this.state.isSpinDashing ? 0x00D4FF : 0xFFFFFF);
+    ghost.setDepth(this.depth - 1);
+    
+    this.scene.tweens.add({
+        targets: ghost,
+        alpha: 0,
+        duration: 300,
+        onComplete: () => ghost.destroy()
     });
   }
 

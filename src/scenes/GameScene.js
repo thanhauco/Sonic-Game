@@ -4,7 +4,10 @@ import Player from '../entities/Player.js';
 import Enemy from '../entities/Enemy.js';
 import Ring from '../entities/Ring.js';
 import Monitor from '../entities/Monitor.js';
+import Boss from '../entities/Boss.js';
+import InteractiveObject from '../entities/InteractiveObject.js';
 import HUD from '../ui/HUD.js';
+import AudioManager from '../utils/AudioManager.js';
 
 export default class GameScene extends Phaser.Scene {
   constructor() {
@@ -14,6 +17,9 @@ export default class GameScene extends Phaser.Scene {
   create() {
     const width = this.cameras.main.width;
     const height = this.cameras.main.height;
+    
+    // Audio manager
+    this.audio = new AudioManager(this);
     
     // Set world bounds
     this.worldWidth = 4000;
@@ -32,11 +38,17 @@ export default class GameScene extends Phaser.Scene {
     this.rings = this.physics.add.group();
     this.enemies = this.physics.add.group();
     this.monitors = this.physics.add.group();
+    this.interactiveObjects = this.physics.add.group();
+    
+    // Combo system
+    this.enemyCombo = 0;
     
     // Populate level
     this.spawnRings();
     this.spawnEnemies();
     this.spawnMonitors();
+    this.spawnInteractiveObjects();
+    this.spawnBoss();
     
     // Setup collisions
     this.setupCollisions();
@@ -350,8 +362,56 @@ export default class GameScene extends Phaser.Scene {
     // Enemies vs platforms
     this.physics.add.collider(this.enemies, this.platforms);
     
-    // Rings vs platforms (for scattered rings)
     this.physics.add.collider(this.rings, this.platforms);
+    
+    // Player vs Interactive Objects
+    this.physics.add.overlap(this.player, this.interactiveObjects, (player, obj) => {
+        obj.onOverlap(player);
+    });
+    
+    // Player vs Boss
+    this.physics.add.overlap(this.player, this.boss, (player, boss) => {
+        this.handleBossCollision(player, boss);
+    });
+  }
+
+  handleBossCollision(player, boss) {
+    if (boss.isDead) return;
+    
+    const isAttacking = 
+      (player.body.velocity.y > 0 && player.y < boss.y - 20) ||
+      player.state.isRolling ||
+      player.state.isJumping ||
+      player.state.isInvincible;
+    
+    if (isAttacking) {
+      boss.takeDamage();
+      player.body.velocity.y = -400;
+      this.cameras.main.shake(200, 0.01);
+    } else {
+      const died = player.takeDamage();
+      if (died) this.playerDeath();
+    }
+  }
+
+  spawnInteractiveObjects() {
+    const height = this.cameras.main.height;
+    const positions = [
+        { x: 850, y: height - 60, type: 'spring' },
+        { x: 1500, y: height - 120, type: 'spikes' },
+        { x: 2100, y: height - 60, type: 'spring' },
+        { x: 2800, y: height - 60, type: 'spikes' },
+        { x: 3300, y: height - 180, type: 'spring' }
+    ];
+    
+    positions.forEach(pos => {
+        const obj = new InteractiveObject(this, pos.x, pos.y, pos.type);
+        this.interactiveObjects.add(obj);
+    });
+  }
+
+  spawnBoss() {
+    this.boss = new Boss(this, 3700, this.cameras.main.height - 300);
   }
 
   handleEnemyCollision(player, enemy) {
@@ -366,16 +426,46 @@ export default class GameScene extends Phaser.Scene {
       // Defeat enemy
       enemy.defeat();
       
+      // Combo scoring
+      this.enemyCombo++;
+      const comboBonus = this.enemyCombo * 100;
+      window.gameState.score += comboBonus;
+      
+      // Visual feedback for combo
+      if (this.enemyCombo > 1) {
+          const comboText = this.add.text(enemy.x, enemy.y - 40, `${comboBonus} COMBO!`, {
+              fontFamily: 'Arial Black',
+              fontSize: '20px',
+              color: '#FFD700'
+          }).setOrigin(0.5);
+          this.tweens.add({
+              targets: comboText,
+              y: enemy.y - 80,
+              alpha: 0,
+              duration: 800,
+              onComplete: () => comboText.destroy()
+          });
+      }
+      
       // Bounce player up
       player.body.velocity.y = -300;
+      
+      // Screen shake
+      this.cameras.main.shake(100, 0.005);
     } else {
       // Player takes damage
       const died = player.takeDamage();
       
       if (died) {
+        this.audio.playHit();
         this.playerDeath();
       }
     }
+  }
+
+  handleEnemyDefeat(enemy) {
+      enemy.defeat();
+      this.audio.playExplosion();
   }
 
   playerDeath() {
@@ -486,6 +576,16 @@ export default class GameScene extends Phaser.Scene {
     // Update player
     this.player.update();
     this.player.updateShield();
+    
+    // Reset combo when landing
+    if (this.player.body.blocked.down || this.player.body.touching.down) {
+        this.enemyCombo = 0;
+    }
+    
+    // Update boss
+    if (this.boss) {
+        this.boss.update(time, delta, this.player);
+    }
     
     // Update enemies
     this.enemies.children.iterate((enemy) => {
