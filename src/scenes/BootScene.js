@@ -88,6 +88,12 @@ export default class BootScene extends Phaser.Scene {
     // Generate enemy sprites
     this.generateEnemySprites();
     
+    // Generate Boss sprites
+    this.generateBossSprites();
+    
+    // Generate interactive objects
+    this.generateInteractiveObjects();
+    
     // Generate background layers
     this.generateBackgrounds();
     
@@ -794,5 +800,99 @@ export default class BootScene extends Phaser.Scene {
     this.time.delayedCall(500, () => {
       this.scene.start('TitleScene');
     });
+  }
+
+  generateBossSprites() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    this.drawEggMobile(ctx, 0, 0);
+    this.textures.addCanvas('boss', canvas);
+  }
+
+  drawEggMobile(ctx, x, y) {
+    ctx.save();
+    ctx.translate(x + 64, y + 64);
+    ctx.fillStyle = '#CCCCCC';
+    ctx.beginPath();
+    ctx.ellipse(0, 10, 50, 35, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#666666';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(0, 191, 255, 0.4)';
+    ctx.beginPath();
+    ctx.arc(0, -10, 30, Math.PI, 0);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#FFCC99';
+    ctx.beginPath();
+    ctx.arc(0, -5, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#8B4513';
+    ctx.beginPath();
+    ctx.moveTo(-15, 0);
+    ctx.lineTo(-25, 10);
+    ctx.lineTo(25, 10);
+    ctx.lineTo(15, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#333333';
+    ctx.fillRect(-8, -10, 6, 4);
+    ctx.fillRect(2, -10, 6, 4);
+    ctx.fillStyle = '#444444';
+    ctx.fillRect(-15, 45, 30, 10);
+    ctx.restore();
+  }
+
+  generateInteractiveObjects() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 64;
+    const ctx = canvas.getContext('2d');
+    this.drawSpring(ctx, 0, 0);
+    this.drawSpikes(ctx, 64, 0);
+    this.textures.addCanvas('interactive', canvas);
+  }
+
+  drawSpring(ctx, x, y) {
+    ctx.save();
+    ctx.translate(x + 32, y + 32);
+    ctx.fillStyle = '#888888';
+    ctx.fillRect(-25, 20, 50, 10);
+    ctx.strokeStyle = '#CCCCCC';
+    ctx.lineWidth = 4;
+    for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(-20, 20 - i * 8);
+        ctx.lineTo(20, 15 - i * 8);
+        ctx.lineTo(-20, 10 - i * 8);
+        ctx.stroke();
+    }
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(-28, -5, 56, 12);
+    ctx.restore();
+  }
+
+  drawSpikes(ctx, x, y) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = '#999999';
+    for (let i = 0; i < 4; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * 16, 64);
+        ctx.lineTo(i * 16 + 8, 20);
+        ctx.lineTo(i * 16 + 16, 64);
+        ctx.fill();
+        ctx.fillStyle = '#CCCCCC';
+        ctx.beginPath();
+        ctx.moveTo(i * 16 + 2, 64);
+        ctx.lineTo(i * 16 + 8, 30);
+        ctx.lineTo(i * 16 + 4, 64);
+        ctx.fill();
+        ctx.fillStyle = '#999999';
+    }
+    ctx.restore();
   }
 }

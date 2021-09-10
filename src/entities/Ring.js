@@ -62,6 +62,8 @@ export default class Ring extends Phaser.Physics.Arcade.Sprite {
     window.gameState.rings++;
     window.gameState.score += GameConfig.SCORE.RING;
     
+    // Play sound
+    if (this.scene.audio) this.scene.audio.playRing();
     
     // Check for extra life
     if (window.gameState.rings >= GameConfig.RINGS_FOR_LIFE) {
