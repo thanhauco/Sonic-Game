@@ -174,15 +174,8 @@ export default class TitleScene extends Phaser.Scene {
       strokeThickness: 2,
     }).setOrigin(0.5);
     
-    // High score display
-    const highScore = window.gameState?.highScore || 0;
-    this.add.text(width / 2, 280, `HIGH SCORE: ${highScore.toString().padStart(8, '0')}`, {
-      fontFamily: 'Arial, sans-serif',
-      fontSize: '20px',
-      color: '#FFD700',
-      stroke: '#000000',
-      strokeThickness: 2,
-    }).setOrigin(0.5);
+    // Add 3D Mode Button
+    this.create3DButton(width, height);
     
     // Input handlers
     this.input.keyboard.once('keydown-SPACE', () => this.startGame());
@@ -214,6 +207,40 @@ export default class TitleScene extends Phaser.Scene {
     this.cameras.main.fadeOut(500, 0, 0, 0);
     this.time.delayedCall(500, () => {
       this.scene.start('GameScene');
+    });
+  }
+
+  create3DButton(width, height) {
+    const btnX = width - 100;
+    const btnY = height - 100;
+
+    const bg = this.add.rectangle(btnX, btnY, 160, 50, 0xFFD700, 1)
+      .setInteractive({ useHandCursor: true })
+      .setStrokeStyle(4, 0x000000);
+      
+    const text = this.add.text(btnX, btnY, 'PLAY 3D MODE', {
+      fontSize: '18px',
+      fontFamily: 'Arial Black',
+      color: '#000000',
+    }).setOrigin(0.5);
+    
+    bg.on('pointerover', () => {
+      bg.setScale(1.1);
+      text.setScale(1.1);
+      bg.setFillStyle(0xFFFFFF);
+    });
+    
+    bg.on('pointerout', () => {
+      bg.setScale(1.0);
+      text.setScale(1.0);
+      bg.setFillStyle(0xFFD700);
+    });
+    
+    bg.on('pointerdown', () => {
+      this.cameras.main.fadeOut(500);
+      this.time.delayedCall(500, () => {
+        window.location.href = '/3d.html';
+      });
     });
   }
 }

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Sonic Rush 3D | High Performance</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background-color: #000;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      }
+      #ui-overlay {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: white;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        pointer-events: none;
+        z-index: 100;
+      }
+      .stat-label {
+        font-size: 14px;
+        color: #AAA;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+      .stat-value {
+        font-size: 32px;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+      #back-button {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(5px);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 10px 20px;
+        border-radius: 30px;
+        cursor: pointer;
+        font-weight: bold;
+        pointer-events: all;
+        transition: all 0.3s ease;
+      }
+      #back-button:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="ui-overlay">
+      <div class="stat-label">Rings</div>
+      <div id="rings-val" class="stat-value">000</div>
+      <div class="stat-label">Score</div>
+      <div id="score-val" class="stat-value">000000</div>
+    </div>
+    <button id="back-button" onclick="window.location.href='/'">Back to 2D</button>
+    <script type="module" src="/src-3d/main-3d.js"></script>
+    <script>
+        // Sync HUD with window.gameState
+        setInterval(() => {
+            if (window.gameState) {
+                document.getElementById('rings-val').textContent = String(window.gameState.rings).padStart(3, '0');
+                document.getElementById('score-val').textContent = String(window.gameState.score).padStart(6, '0');
+            }
+        }, 100);
+    </script>
+  </body>
+</html>
