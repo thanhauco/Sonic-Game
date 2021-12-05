@@ -26,6 +26,12 @@ export default class AssetLoader {
         
         this.materials.set('grass', new THREE.MeshPhongMaterial({ color: GameConfig3D.COLORS.GRASS }));
         this.materials.set('ground', new THREE.MeshPhongMaterial({ color: GameConfig3D.COLORS.GROUND }));
+        
+        // Obstacle Materials
+        this.materials.set('hurdle', new THREE.MeshPhongMaterial({ color: 0xFFFFFF })); // White/Red stripes later
+        this.materials.set('barrier', new THREE.MeshPhongMaterial({ color: 0x444444, transparent: true, opacity: 0.8 }));
+        this.materials.set('dash-panel', new THREE.MeshBasicMaterial({ color: 0x00FF00, emissive: 0x00FF00 }));
+        this.materials.set('enemy-red', new THREE.MeshPhongMaterial({ color: 0xFF0000 }));
     }
 
     createSonicModel() {
@@ -73,6 +79,72 @@ export default class AssetLoader {
                 child.receiveShadow = true;
             }
         });
+        
+        return group;
+    }
+
+    createHurdleModel() {
+        const group = new THREE.Group();
+        const baseGeom = new THREE.BoxGeometry(3, 0.2, 0.5);
+        const bar = new THREE.Mesh(baseGeom, this.materials.get('hurdle'));
+        bar.position.y = 1;
+        group.add(bar);
+        
+        const legGeom = new THREE.CylinderGeometry(0.1, 0.1, 1, 8);
+        const leftLeg = new THREE.Mesh(legGeom, this.materials.get('hurdle'));
+        leftLeg.position.set(-1.4, 0.5, 0);
+        group.add(leftLeg);
+        
+        const rightLeg = new THREE.Mesh(legGeom, this.materials.get('hurdle'));
+        rightLeg.position.set(1.4, 0.5, 0);
+        group.add(rightLeg);
+        
+        return group;
+    }
+
+    createBarrierModel() {
+        const geom = new THREE.BoxGeometry(3, 2, 0.2);
+        const mesh = new THREE.Mesh(geom, this.materials.get('barrier'));
+        mesh.position.y = 3; // Hanging barrier
+        return mesh;
+    }
+
+    createDashPanelModel() {
+        const group = new THREE.Group();
+        const plateGeom = new THREE.PlaneGeometry(2.5, 3);
+        const plate = new THREE.Mesh(plateGeom, this.materials.get('dash-panel'));
+        plate.rotation.x = -Math.PI / 2;
+        plate.position.y = 0.05;
+        group.add(plate);
+        
+        // Arrow visual
+        const arrowGeom = new THREE.ConeGeometry(0.5, 1, 4);
+        const arrow = new THREE.Mesh(arrowGeom, this.materials.get('dash-panel'));
+        arrow.rotation.x = -Math.PI / 2;
+        arrow.position.set(0, 0.1, 0);
+        group.add(arrow);
+        
+        return group;
+    }
+
+    createEnemyModel() {
+        const group = new THREE.Group();
+        const bodyGeom = new THREE.CapsuleGeometry(0.6, 1, 4, 8);
+        const body = new THREE.Mesh(bodyGeom, this.materials.get('enemy-red'));
+        body.rotation.z = Math.PI / 2;
+        body.position.y = 0.6;
+        group.add(body);
+        
+        // Wheeels
+        const wheelGeom = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 8);
+        const w1 = new THREE.Mesh(wheelGeom, this.materials.get('ground'));
+        w1.rotation.x = Math.PI / 2;
+        w1.position.set(-0.5, 0.3, 0.4);
+        group.add(w1);
+        
+        const w2 = w1.clone();
+        w2.position.set(0.5, 0.3, 0.4);
+        group.add(w2);
         
         return group;
     }

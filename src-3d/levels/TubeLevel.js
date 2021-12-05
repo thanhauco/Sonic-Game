@@ -12,6 +12,7 @@ export default class TubeLevel {
         
         this.rings = [];
         this.obstacles = [];
+        this.enemies = [];
         
         // Use InstancedMesh for high performance ring rendering
         this.setupInstancedRings();
@@ -58,8 +59,36 @@ export default class TubeLevel {
         // Spawn rings in patterns
         this.spawnRingPattern(zOffset);
         
+        // Spawn obstacles
+        if (Math.random() < GameConfig3D.OBSTACLE_FREQUENCY) {
+            this.spawnObstaclePattern(zOffset);
+        }
+        
         this.scene.add(group);
         this.chunks.push({ z: zOffset, group });
+    }
+
+    spawnObstaclePattern(zOffset) {
+        const laneX = [-GameConfig3D.LANE_WIDTH, 0, GameConfig3D.LANE_WIDTH];
+        const types = Object.values(GameConfig3D.OBSTACLE_TYPES);
+        
+        const type = types[Math.floor(Math.random() * types.length)];
+        const lane = laneX[Math.floor(Math.random() * 3)];
+        const z = zOffset + Math.random() * GameConfig3D.CHUNK_LENGTH;
+        
+        let model;
+        switch(type) {
+            case 'hurdle': model = this.assetLoader.createHurdleModel(); break;
+            case 'barrier': model = this.assetLoader.createBarrierModel(); break;
+            case 'dash_panel': model = this.assetLoader.createDashPanelModel(); break;
+            case 'enemy': model = this.assetLoader.createEnemyModel(); break;
+        }
+        
+        if (model) {
+            model.position.set(lane, 0, z);
+            this.scene.add(model);
+            this.obstacles.push({ type, lane, z, model });
+        }
     }
 
     spawnRingPattern(zOffset) {
@@ -107,6 +136,15 @@ export default class TubeLevel {
             
             // Cleanup old rings
             this.activeRings = this.activeRings.filter(r => r.z > playerZ - 50);
+            
+            // Cleanup old obstacles
+            this.obstacles = this.obstacles.filter(obs => {
+                if (obs.z < playerZ - 50) {
+                    this.scene.remove(obs.model);
+                    return false;
+                }
+                return true;
+            });
         }
     }
 
@@ -115,7 +153,9 @@ export default class TubeLevel {
         const pX = player.position.x;
         const pY = player.position.y;
         const pZ = player.position.z;
+        const config = GameConfig3D;
         
+        // Ring collisions
         this.activeRings.forEach(ring => {
             if (ring.collected) return;
             
@@ -126,6 +166,24 @@ export default class TubeLevel {
             if (dx < 1 && dy < 1.5 && dz < 1) {
                 ring.collected = true;
                 this.onRingCollected();
+            }
+        });
+
+        // Obstacle collisions
+        this.obstacles.forEach(obs => {
+            const dx = Math.abs(pX - obs.lane);
+            const dz = Math.abs(pZ - obs.z);
+            
+            if (dx < 1 && dz < 1) {
+                if (obs.type === config.OBSTACLE_TYPES.DASH_PANEL) {
+                    player.activateDash();
+                } else if (obs.type === config.OBSTACLE_TYPES.HURDLE) {
+                    if (!player.isJumping) player.takeDamage();
+                } else if (obs.type === config.OBSTACLE_TYPES.BARRIER) {
+                    if (!player.isSliding) player.takeDamage();
+                } else if (obs.type === config.OBSTACLE_TYPES.ENEMY) {
+                    if (!player.isJumping && !player.isRolling) player.takeDamage();
+                }
             }
         });
     }

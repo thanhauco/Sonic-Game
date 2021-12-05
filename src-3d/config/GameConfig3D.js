@@ -28,7 +28,18 @@ export const GameConfig3D = {
   CHUNK_LENGTH: 100,
   VISIBLE_CHUNKS: 3,
   RING_SPACING: 5,
-  OBSTACLE_FREQUENCY: 0.1,
+  OBSTACLE_FREQUENCY: 0.15,
+  
+  // Obstacle Types
+  OBSTACLE_TYPES: {
+    HURDLE: 'hurdle',
+    BARRIER: 'barrier',
+    DASH_PANEL: 'dash_panel',
+    ENEMY: 'enemy'
+  },
+  
+  DASH_BOOST: 2.0,
+  DASH_DURATION: 2000,
   
   // Scoring
   RING_SCORE: 10,
