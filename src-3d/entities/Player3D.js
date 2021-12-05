@@ -10,7 +10,10 @@ export default class Player3D extends THREE.Group {
         this.targetLane = 0; // -1, 0, 1
         this.isJumping = false;
         this.isRolling = false;
+        this.isSliding = false;
         this.speedMultiplier = 1;
+        this.speedBoostTimer = 0;
+        this.fovTarget = GameConfig3D.FOV;
         
         // Tilt animation
         this.rotationGroup = model;
@@ -33,6 +36,22 @@ export default class Player3D extends THREE.Group {
         }
         this.prevLeft = keys.left;
         this.prevRight = keys.right;
+        
+        // Handle Sliding
+        if (keys.down && !this.isJumping) {
+            this.isSliding = true;
+        } else {
+            this.isSliding = false;
+        }
+        
+        // Handle Speed Boost Timer
+        if (this.speedBoostTimer > 0) {
+            this.speedBoostTimer -= delta;
+            if (this.speedBoostTimer <= 0) {
+                this.speedMultiplier = 1;
+                this.fovTarget = GameConfig3D.FOV;
+            }
+        }
         
         // Interpolate to target lane
         const targetX = this.targetLane * config.LANE_WIDTH;
@@ -71,6 +90,47 @@ export default class Player3D extends THREE.Group {
             // Running bob
             this.rotationGroup.position.y = Math.abs(Math.sin(time * 0.01)) * 0.1;
         }
+    }
+
+    activateDash() {
+        this.speedMultiplier = GameConfig3D.DASH_BOOST;
+        this.speedBoostTimer = GameConfig3D.DASH_DURATION;
+        this.fovTarget = GameConfig3D.FOV + 15;
+    }
+
+    takeDamage() {
+        if (this.isInvincible) return;
+        
+        if (window.gameState.rings > 0) {
+            window.gameState.rings = 0;
+            this.setInvincible(2000);
+            
+            // Visual feedback
+            this.rotationGroup.traverse(child => {
+                if (child.isMesh) child.material.emissive = new THREE.Color(0xFF0000);
+            });
+            setTimeout(() => {
+                this.rotationGroup.traverse(child => {
+                    if (child.isMesh) child.material.emissive = new THREE.Color(0x000000);
+                });
+            }, 500);
+        } else {
+            // Death logic would go here
+            console.log("3D Sonic Died!");
+        }
+    }
+
+    setInvincible(duration) {
+        this.isInvincible = true;
+        const blinkInterval = setInterval(() => {
+            this.visible = !this.visible;
+        }, 100);
+        
+        setTimeout(() => {
+            clearInterval(blinkInterval);
+            this.visible = true;
+            this.isInvincible = false;
+        }, duration);
     }
 
     collectRing() {
