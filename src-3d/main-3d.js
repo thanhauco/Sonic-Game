@@ -4,6 +4,7 @@ import Scene from './core/Scene.js';
 import AssetLoader from './core/AssetLoader.js';
 import Player3D from './entities/Player3D.js';
 import TubeLevel from './levels/TubeLevel.js';
+import SpeedLines from './effects/SpeedLines.js';
 import { GameConfig3D } from './config/GameConfig3D.js';
 
 class Game3D {
@@ -25,7 +26,7 @@ class Game3D {
         this.camera.position.set(0, 5, -10); // Fly-behind camera
         
         // Input tracking
-        this.keys = { left: false, right: false, space: false };
+        this.keys = { left: false, right: false, space: false, down: false };
         this.setupKeyboard();
         
         // Entities
@@ -46,6 +47,10 @@ class Game3D {
         // Level
         this.level = new TubeLevel(this.scene, this.assetLoader);
         
+        // Effects
+        this.speedLines = new SpeedLines();
+        this.scene.add(this.speedLines);
+        
         // Global game state (shared with 2D if needed)
         window.gameState = window.gameState || {
             score: 0,
@@ -58,12 +63,14 @@ class Game3D {
         window.addEventListener('keydown', (e) => {
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = true;
             if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = true;
+            if (e.code === 'ArrowDown' || e.code === 'KeyS') this.keys.down = true;
             if (e.code === 'Space') this.keys.space = true;
         });
 
         window.addEventListener('keyup', (e) => {
             if (e.code === 'ArrowLeft' || e.code === 'KeyA') this.keys.left = false;
             if (e.code === 'ArrowRight' || e.code === 'KeyD') this.keys.right = false;
+            if (e.code === 'ArrowDown' || e.code === 'KeyS') this.keys.down = false;
             if (e.code === 'Space') this.keys.space = false;
         });
     }
@@ -80,6 +87,13 @@ class Game3D {
         this.player.update(time, delta, this.keys);
         this.level.update(this.player.position.z);
         this.level.checkCollisions(this.player);
+        this.speedLines.update(this.player.position, this.player.speedMultiplier > 1);
+        
+        // Update FOV (Dash Effect)
+        if (Math.abs(this.camera.fov - this.player.fovTarget) > 0.1) {
+            this.camera.fov += (this.player.fovTarget - this.camera.fov) * 0.1;
+            this.camera.updateProjectionMatrix();
+        }
         
         // Camera Follow
         const targetCamPos = new THREE.Vector3(
