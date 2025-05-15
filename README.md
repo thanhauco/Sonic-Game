@@ -19,7 +19,9 @@ Jordan Agents uses a high-performance hybrid architecture:
 - **Server**: Node.js Express API for workspace management, document processing, and RAG.
 - **Agent Engine**: Python-based core for natural language parsing and autonomous workflow execution.
 
-## 🚀 Quick Start (Coming Soon)
+## 🚀 Quick Start
+
+**Current Status:** v1.0.0 Stable Release
 
 ```bash
 git clone https://github.com/thanhauco/jordan-agents.git
