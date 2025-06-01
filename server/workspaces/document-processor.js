@@ -3,7 +3,8 @@ const path = require('path');
 
 class DocumentProcessor {
   constructor() {
-    this.supportedExtensions = ['.txt', '.md', '.pdf', '.docx', '.json'];
+    this.supportedExtensions = ['.txt', '.md', '.pdf', '.docx', '.json', '.png', '.jpg', '.jpeg', '.mp3', '.wav', '.mp4'];
+    this.multimodalExtensions = ['.png', '.jpg', '.jpeg', '.mp3', '.wav', '.mp4'];
   }
 
   async process(filePath) {
@@ -25,7 +26,15 @@ class DocumentProcessor {
   }
 
   async _readContent(filePath, ext) {
-    // Simplified reading logic
+    if (this.multimodalExtensions.includes(ext)) {
+      if (['.mp3', '.wav', '.mp4'].includes(ext)) {
+        return `[Transcribing audio/video ${path.basename(filePath)}...] This is a synthetic transcription placeholder for a multimodal agentic RAG system.`;
+      }
+      if (['.png', '.jpg', '.jpeg'].includes(ext)) {
+        return `[Analyzing image ${path.basename(filePath)}...] Visual description placeholder: A digital flowchart showing system architecture with nodes for UI, API, and Agent Engine.`;
+      }
+    }
+
     if (ext === '.json') {
       const data = await fs.readJson(filePath);
       return JSON.stringify(data);
