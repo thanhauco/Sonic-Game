@@ -1,0 +1,31 @@
+{
+  "name": "jordan-agents",
+  "version": "0.1.0",
+  "description": "Unified AI agent framework with zero-code automation and RAG",
+  "main": "index.js",
+  "scripts": {
+    "setup": "npm install && cd server && npm install && cd ../frontend && npm install",
+    "dev:server": "cd server && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:frontend\"",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "rag",
+    "automation",
+    "llm"
+  ],
+  "author": "Thanh Vu <thanhauco@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "workspaces": [
+    "server",
+    "frontend",
+    "agent-engine"
+  ]
+}
