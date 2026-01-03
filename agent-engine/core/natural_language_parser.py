@@ -4,9 +4,9 @@ import json
 class NaturalLanguageParser:
     def __init__(self):
         self.intent_patterns = {
-            'create_agent': r'(create|build|make)\s+(a|an)?\s+agent\s+(named|called)?\s+(?P<name>[\w\- ]+)',
-            'define_tool': r'(define|add)\s+(a|an)?\s+tool\s+(called|named)?\s+(?P<name>[\w\- ]+)\s+that\s+(?P<desc>.+)',
-            'create_workflow': r'(create|setup)\s+(a|an)?\s+workflow\s+(named|called)?\s+(?P<name>[\w\- ]+)'
+            'create_agent': r'(create|build|make|initialize)\s+(a|an)?\s+agent\s+(named|called|with name)?\s+(?P<name>[\w\- ]+)',
+            'define_tool': r'(define|add|create)\s+(a|an)?\s+tool\s+(called|named)?\s+(?P<name>[\w\- ]+)\s+(that|which)\s+(?P<desc>.+)',
+            'create_workflow': r'(create|setup|orchestrate)\s+(a|an)?\s+workflow\s+(named|called)?\s+(?P<name>[\w\- ]+)'
         }
 
     def parse(self, text):
